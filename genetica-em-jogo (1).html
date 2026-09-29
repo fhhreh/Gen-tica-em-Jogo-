@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genética em Jogo — Polialelia & Tipos Sanguíneos</title>
+<style>
+  :root{
+    --forest:#1F4B3F;
+    --forest-light:#E7F1E4;
+    --forest-line:#BFD6BC;
+    --blood:#B3231C;
+    --blood-light:#FBE4E1;
+    --blood-line:#EFC0BB;
+    --hemo:#2B4C7E;
+    --hemo-light:#E3EBF6;
+    --hemo-line:#BCCCE6;
+    --sand:#D8A857;
+    --ink:#20291F;
+    --ink-soft:#4B584A;
+    --paper:#FBF7EC;
+    --paper-2:#F3EDDD;
+    --line:#D8CDB4;
+    --good:#2E7D4F;
+    --bad:#B3231C;
+    --radius-card:10px;
+    --shadow: 0 1px 0 rgba(32,41,31,0.06), 0 6px 16px rgba(32,41,31,0.08);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper-2);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+    margin:0 0 .4em 0;
+    font-weight:700;
+    color:var(--ink);
+  }
+  p{margin:0 0 .8em 0;}
+  sup{font-size:.7em;}
+  button{font-family:inherit;}
+  :focus-visible{outline:3px solid var(--sand); outline-offset:2px;}
+
+  /* ============ HEADER ============ */
+  header{
+    background:var(--ink);
+    color:var(--paper);
+    padding:18px 20px 0 20px;
+    position:sticky;
+    top:0;
+    z-index:50;
+    box-shadow:0 4px 14px rgba(0,0,0,.18);
+  }
+  .header-top{
+    max-width:980px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+    padding-bottom:14px;
+  }
+  .title-block{flex:1 1 320px; min-width:220px;}
+  .title-block h1{
+    color:var(--paper);
+    font-size:1.5rem;
+    letter-spacing:.2px;
+    margin:0;
+    opacity:0;
+    animation: dropIn .7s ease .1s forwards;
+  }
+  .title-block .tagline{
+    color:#C9CFC4;
+    font-size:.88rem;
+    margin-top:2px;
+    opacity:0;
+    animation: dropIn .7s ease .25s forwards;
+  }
+  @keyframes dropIn{
+    from{opacity:0; transform:translateY(-6px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  .mascot-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:999px;
+    padding:6px 14px 6px 6px;
+    max-width:420px;
+    opacity:0;
+    animation: dropIn .7s ease .4s forwards;
+  }
+  .mascot-face{
+    width:38px;height:38px;
+    border-radius:50%;
+    background:var(--sand);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.25rem;
+    flex:none;
+  }
+  #mascot-msg{
+    font-size:.82rem;
+    color:#EFEAD9;
+  }
+
+  .score-strip{
+    display:flex; gap:10px; align-items:center; flex:none;
+    opacity:0;
+    animation: dropIn .7s ease .4s forwards;
+  }
+  .score-pill{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:8px;
+    padding:6px 12px;
+    font-size:.82rem;
+    color:#EFEAD9;
+    white-space:nowrap;
+  }
+  .score-pill b{color:var(--sand); font-size:.95rem;}
+
+  nav.tabs{
+    max-width:980px;
+    margin:0 auto;
+    display:flex;
+    gap:6px;
+  }
+  nav.tabs button{
+    background:transparent;
+    border:none;
+    color:#C9CFC4;
+    padding:10px 16px 12px 16px;
+    font-size:.92rem;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  nav.tabs button:hover{color:#fff;}
+  nav.tabs button.active{color:#fff; border-bottom-color:var(--sand);}
+  nav.tabs button .dot{
+    width:9px;height:9px;border-radius:50%;flex:none;
+  }
+  nav.tabs button[data-tab="coelhos"] .dot{background:#7FBF8C;}
+  nav.tabs button[data-tab="sangue"] .dot{background:#E58F89;}
+  nav.tabs button[data-tab="hemocentro"] .dot{background:#8FADD9;}
+
+  /* ============ LAYOUT ============ */
+  main{max-width:980px; margin:0 auto; padding:26px 20px 70px 20px;}
+  section.panel{display:none;}
+  section.panel.active{display:block; animation: fadeUp .35s ease;}
+  @keyframes fadeUp{
+    from{opacity:0; transform:translateY(8px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  .station-head{
+    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+    padding-bottom:12px;
+    border-bottom:2px solid var(--line);
+  }
+  .station-head h2{font-size:1.55rem;}
+  .station-head .station-sub{color:var(--ink-soft); font-size:.92rem; max-width:56ch;}
+
+  /* Specimen record card (signature element) */
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius-card);
+    padding:20px 20px 18px 20px;
+    margin-bottom:18px;
+    box-shadow:var(--shadow);
+    position:relative;
+  }
+  .card::before{
+    content:'';
+    position:absolute;
+    top:14px; left:-6px;
+    width:12px;height:12px;
+    border-radius:50%;
+    background:var(--paper-2);
+    border:1px solid var(--line);
+  }
+  .card::after{
+    content:'';
+    position:absolute;
+    bottom:14px; left:-6px;
+    width:12px;height:12px;
+    border-radius:50%;
+    background:var(--paper-2);
+    border:1px solid var(--line);
+  }
+  .card h3{font-size:1.1rem;}
+  .card.forest{border-top:4px solid var(--forest);}
+  .card.blood{border-top:4px solid var(--blood);}
+  .card.hemo{border-top:4px solid var(--hemo);}
+
+  .tag-line{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    margin:10px 0;
+  }
+  .allele-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--forest-light);
+    border:1px solid var(--forest-line);
+    color:var(--forest);
+    padding:5px 12px;
+    border-radius:7px;
+    font-size:.92rem;
+    font-weight:600;
+  }
+  .arrow-dom{color:var(--ink-soft); font-size:.95rem;}
+
+  table.geno-table{
+    border-collapse:collapse;
+    width:100%;
+    margin:12px 0;
+    font-size:.9rem;
+  }
+  table.geno-table th, table.geno-table td{
+    border:1px solid var(--line);
+    padding:8px 10px;
+    text-align:left;
+  }
+  table.geno-table th{background:var(--paper-2); font-weight:700;}
+
+  .swatch{
+    display:inline-block;
+    width:16px;height:16px;
+    border-radius:4px;
+    border:1px solid rgba(0,0,0,.25);
+    vertical-align:-3px;
+    margin-right:6px;
+  }
+
+  /* Cross simulator */
+  .cross-controls{
+    display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .field{display:flex; flex-direction:column; gap:6px; min-width:200px;}
+  .field label{font-size:.82rem; color:var(--ink-soft); font-weight:600;}
+  select{
+    padding:9px 10px;
+    border-radius:7px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-size:.92rem;
+    color:var(--ink);
+  }
+  .btn{
+    border:none;
+    border-radius:8px;
+    padding:10px 18px;
+    font-size:.92rem;
+    font-weight:700;
+    cursor:pointer;
+    transition:transform .08s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-forest{background:var(--forest); color:#fff;}
+  .btn-forest:hover{filter:brightness(1.08);}
+  .btn-blood{background:var(--blood); color:#fff;}
+  .btn-blood:hover{filter:brightness(1.08);}
+  .btn-hemo{background:var(--hemo); color:#fff;}
+  .btn-hemo:hover{filter:brightness(1.08);}
+  .btn-outline{background:transparent; border:1.5px solid var(--line); color:var(--ink);}
+  .btn-outline:hover{background:var(--paper-2);}
+
+  .punnett-wrap{overflow-x:auto;}
+  table.punnett{
+    border-collapse:collapse;
+    margin-top:6px;
+  }
+  table.punnett th, table.punnett td{
+    border:1px solid var(--line);
+    padding:0;
+    text-align:center;
+    width:120px;
+    height:70px;
+  }
+  table.punnett th{background:var(--forest-light); color:var(--forest); font-size:.95rem;}
+  .offspring-cell{
+    height:100%; width:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    font-size:.86rem;
+  }
+  .offspring-cell .pheno-name{font-size:.72rem; color:var(--ink-soft);}
+
+  .ratio-summary{
+    display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;
+  }
+  .ratio-item{
+    display:flex; align-items:center; gap:8px;
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 12px;
+    font-size:.86rem;
+  }
+
+  /* Quiz */
+  .quiz-progress{font-size:.82rem; color:var(--ink-soft); margin-bottom:6px;}
+  .quiz-prompt{font-size:1.02rem; font-weight:600; margin-bottom:14px;}
+  .quiz-options{display:grid; gap:9px; grid-template-columns:1fr 1fr;}
+  @media (max-width:560px){.quiz-options{grid-template-columns:1fr;}}
+  .opt-btn{
+    text-align:left;
+    padding:11px 14px;
+    border-radius:8px;
+    border:1.5px solid var(--line);
+    background:#fff;
+    cursor:pointer;
+    font-size:.9rem;
+    color:var(--ink);
+    transition:border-color .12s ease, background .12s ease, transform .08s ease;
+  }
+  .opt-btn:hover:not(:disabled){border-color:var(--sand); background:var(--paper-2);}
+  .opt-btn:disabled{cursor:default;}
+  .opt-btn.correct{background:#E4F3E8; border-color:var(--good); color:#1E5C36;}
+  .opt-btn.incorrect{background:#FBE4E1; border-color:var(--bad); color:#7A1712;}
+  .opt-btn.reveal{background:#E4F3E8; border-color:var(--good); color:#1E5C36;}
+
+  .feedback-box{
+    margin-top:14px;
+    padding:12px 14px;
+    border-radius:8px;
+    font-size:.88rem;
+    display:none;
+  }
+  .feedback-box.show{display:block;}
+  .feedback-box.ok{background:#E4F3E8; border:1px solid var(--good); color:#1E5C36;}
+  .feedback-box.no{background:#FBE4E1; border:1px solid var(--bad); color:#7A1712;}
+
+  .quiz-footer{display:flex; justify-content:space-between; align-items:center; margin-top:16px;}
+  .quiz-score{font-size:.86rem; color:var(--ink-soft);}
+
+  .shake{animation:shakeAnim .35s ease;}
+  @keyframes shakeAnim{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-5px);}
+    75%{transform:translateX(5px);}
+  }
+
+  /* Pedigree cases */
+  .case-desc{font-size:.92rem; margin-bottom:12px; color:var(--ink-soft);}
+  .chip-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .chip-btn{
+    padding:9px 16px;
+    border-radius:999px;
+    border:1.5px solid var(--line);
+    background:#fff;
+    cursor:pointer;
+    font-size:.86rem;
+    font-weight:600;
+    color:var(--ink);
+    transition:all .12s ease;
+  }
+  .chip-btn.selected{background:var(--blood-light); border-color:var(--blood); color:var(--blood);}
+  .chip-btn.marked-correct{background:#E4F3E8; border-color:var(--good); color:#1E5C36;}
+  .chip-btn.marked-missing{background:#fff; border:1.5px dashed var(--good); color:#1E5C36;}
+  .chip-btn.marked-wrong{background:#FBE4E1; border-color:var(--bad); color:#7A1712;}
+  .chip-btn:disabled{cursor:default;}
+
+  /* ============ HEMOCENTRO ============ */
+  .hemo-hud{
+    display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;
+  }
+  .hud-pill{
+    background:var(--hemo-light);
+    border:1px solid var(--hemo-line);
+    color:var(--hemo);
+    padding:8px 14px;
+    border-radius:8px;
+    font-size:.86rem;
+    font-weight:700;
+    display:flex; align-items:center; gap:6px;
+  }
+
+  .patient-card{
+    display:flex; gap:16px; align-items:center; flex-wrap:wrap;
+    background:linear-gradient(180deg,#fff, var(--hemo-light));
+    border:1px solid var(--hemo-line);
+    border-radius:10px;
+    padding:16px 18px;
+    margin-bottom:18px;
+  }
+  .patient-avatar{
+    width:56px;height:56px; border-radius:50%;
+    background:var(--hemo);
+    color:#fff; font-size:1.6rem;
+    display:flex; align-items:center; justify-content:center;
+    flex:none;
+  }
+  .patient-info{flex:1; min-width:200px;}
+  .patient-info .p-name{font-weight:700; font-size:1.02rem;}
+  .patient-info .p-story{font-size:.85rem; color:var(--ink-soft);}
+  .patient-need{
+    text-align:center; flex:none;
+  }
+  .patient-need .need-label{font-size:.72rem; color:var(--ink-soft); text-transform:none;}
+  .patient-need .need-type{
+    font-size:1.6rem; font-weight:800; color:var(--blood);
+    line-height:1.1;
+  }
+
+  .stock-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(92px,1fr));
+    gap:14px;
+    margin-top:6px;
+  }
+  .bag-btn{
+    background:none; border:none; cursor:pointer; padding:0;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+  }
+  .bag-btn:disabled{cursor:not-allowed;}
+  .blood-bag{
+    position:relative;
+    width:64px; height:82px;
+    background:linear-gradient(180deg,#D3372C,var(--blood));
+    border-radius:6px 6px 24px 24px;
+    box-shadow:inset 0 -14px 16px rgba(0,0,0,.18), 0 3px 6px rgba(0,0,0,.15);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .1s ease, filter .15s ease;
+  }
+  .blood-bag::before{
+    content:'';
+    position:absolute; top:-7px; left:50%; transform:translateX(-50%);
+    width:14px; height:14px; border-radius:50%;
+    border:3px solid var(--ink); background:var(--paper-2);
+  }
+  .bag-label{color:#fff; font-weight:800; font-size:.86rem; text-shadow:0 1px 2px rgba(0,0,0,.25);}
+  .bag-btn:not(:disabled):hover .blood-bag{transform:translateY(-3px);}
+  .bag-btn:disabled .blood-bag{filter:grayscale(.7) brightness(1.3); box-shadow:none;}
+  .bag-count{font-size:.78rem; color:var(--ink-soft); font-weight:600;}
+
+  .pulse-good{animation:pulseGood .5s ease;}
+  @keyframes pulseGood{
+    0%{box-shadow:0 0 0 0 rgba(46,125,79,.5);}
+    100%{box-shadow:0 0 0 18px rgba(46,125,79,0);}
+  }
+
+  .hemo-log{
+    font-size:.84rem;
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 14px;
+    max-height:120px;
+    overflow-y:auto;
+  }
+  .hemo-log div{margin-bottom:4px;}
+  .hemo-log .log-ok{color:var(--good);}
+  .hemo-log .log-bad{color:var(--bad);}
+
+  .compat-legend{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px;
+    font-size:.82rem; color:var(--ink-soft);
+    margin-top:10px;
+  }
+  .compat-legend div{background:var(--paper-2); border:1px solid var(--line); border-radius:7px; padding:8px 10px;}
+
+  .end-screen{
+    text-align:center; padding:20px 10px;
+  }
+  .end-screen .big-num{font-size:2.4rem; font-weight:800; color:var(--hemo);}
+
+  footer{
+    text-align:center; padding:24px 20px 40px 20px;
+    color:var(--ink-soft); font-size:.78rem;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="title-block">
+      <h1>🧬 Genética em Jogo</h1>
+      <div class="tagline">Polialelia em coelhos · Sistema ABO · Fator Rh</div>
+    </div>
+    <div class="mascot-wrap">
+      <div class="mascot-face">🐇</div>
+      <div id="mascot-msg">Oi! Eu sou o Dr. Coelho. Vamos decifrar a genética juntos?</div>
+    </div>
+    <div class="score-strip">
+      <div class="score-pill">Pontos: <b id="global-score">0</b></div>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button data-tab="coelhos" class="active"><span class="dot"></span>Coelhos</button>
+    <button data-tab="sangue"><span class="dot"></span>Sistema ABO e Rh</button>
+    <button data-tab="hemocentro"><span class="dot"></span>Centro de Doação</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ======================= ESTAÇÃO 1: COELHOS ======================= -->
+  <section class="panel active" id="panel-coelhos">
+    <div class="station-head">
+      <div>
+        <h2>🐇 Polialelia na pelagem dos coelhos</h2>
+        <div class="station-sub">Um único loco gênico, quatro alelos possíveis, uma hierarquia de dominância. Monte cruzamentos e descubra as pelagens.</div>
+      </div>
+    </div>
+
+    <div class="card forest">
+      <h3>O gene C e seus quatro alelos</h3>
+      <p>Na espécie de coelho <em>Oryctolagus cuniculus</em>, a cor da pelagem é definida por um único gene com quatro alelos possíveis (série alélica), com uma ordem de dominância bem definida:</p>
+      <div class="tag-line">
+        <span class="allele-chip">C</span>
+        <span class="arrow-dom">é dominante sobre</span>
+        <span class="allele-chip">c<sup>ch</sup></span>
+        <span class="arrow-dom">que é dominante sobre</span>
+        <span class="allele-chip">c<sup>h</sup></span>
+        <span class="arrow-dom">que é dominante sobre</span>
+        <span class="allele-chip">c</span>
+      </div>
+      <table class="geno-table">
+        <tr><th>Alelo</th><th>Fenótipo quando aparece "descoberto"</th><th>Cor de referência</th></tr>
+        <tr><td>C</td><td>Selvagem (Aguti) — pelagem colorida padrão</td><td><span class="swatch" style="background:#8B6B4A"></span>castanho-acinzentado</td></tr>
+        <tr><td>c<sup>ch</sup></td><td>Chinchila — cinza prateado</td><td><span class="swatch" style="background:#B9C0C4"></span>cinza claro</td></tr>
+        <tr><td>c<sup>h</sup></td><td>Himalaia — corpo branco, extremidades escuras</td><td><span class="swatch" style="background:#F5F0E6; border-color:#333"></span>branco c/ pontas</td></tr>
+        <tr><td>c</td><td>Albino — ausência total de pigmento</td><td><span class="swatch" style="background:#FFFFFF; border-color:#E8A0A0"></span>branco/rosado</td></tr>
+      </table>
+      <p style="font-size:.85rem; color:var(--ink-soft); margin-top:8px;">Regra de ouro: em qualquer genótipo, o fenótipo é definido pelo alelo <strong>mais dominante presente</strong> — mesmo que o coelho carregue alelos "mais recessivos" escondidos.</p>
+    </div>
+
+    <div class="card forest">
+      <h3>Simulador de cruzamento</h3>
+      <p style="font-size:.88rem;">Escolha o genótipo dos dois pais e veja o quadro de Punnett com a prole.</p>
+      <div class="cross-controls">
+        <div class="field">
+          <label for="parent1-select">Genótipo do Pai/Mãe 1</label>
+          <select id="parent1-select"></select>
+        </div>
+        <div class="field">
+          <label for="parent2-select">Genótipo do Pai/Mãe 2</label>
+          <select id="parent2-select"></select>
+        </div>
+        <button class="btn btn-forest" id="cross-btn">Cruzar 🐇</button>
+      </div>
+      <div class="punnett-wrap">
+        <table class="punnett" id="punnett-table"></table>
+      </div>
+      <div class="ratio-summary" id="ratio-summary"></div>
+    </div>
+
+    <div class="card forest">
+      <h3>Desafio do Criador — quiz</h3>
+      <div class="quiz-progress" id="rabbit-progress">Questão 1 de 5</div>
+      <div class="quiz-prompt" id="rabbit-prompt"></div>
+      <div class="quiz-options" id="rabbit-options"></div>
+      <div class="feedback-box" id="rabbit-feedback"></div>
+      <div class="quiz-footer">
+        <div class="quiz-score">Acertos: <span id="rabbit-score">0</span>/5</div>
+        <button class="btn btn-outline" id="rabbit-next" style="display:none;">Próxima pergunta →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= ESTAÇÃO 2: SANGUE ======================= -->
+  <section class="panel" id="panel-sangue">
+    <div class="station-head">
+      <div>
+        <h2>🩸 Sistema ABO e fator Rh</h2>
+        <div class="station-sub">Codominância, alelos múltiplos e heranças que resolvem casos reais de parentesco.</div>
+      </div>
+    </div>
+
+    <div class="card blood">
+      <h3>Sistema ABO — três alelos, uma codominância</h3>
+      <p>O sistema ABO é controlado por um gene com três alelos: <strong>I<sup>A</sup></strong>, <strong>I<sup>B</sup></strong> e <strong>i</strong>. Os alelos I<sup>A</sup> e I<sup>B</sup> são <strong>codominantes</strong> entre si e ambos dominantes sobre <strong>i</strong>.</p>
+      <table class="geno-table">
+        <tr><th>Genótipo</th><th>Tipo sanguíneo</th></tr>
+        <tr><td>I<sup>A</sup>I<sup>A</sup> ou I<sup>A</sup>i</td><td>A</td></tr>
+        <tr><td>I<sup>B</sup>I<sup>B</sup> ou I<sup>B</sup>i</td><td>B</td></tr>
+        <tr><td>I<sup>A</sup>I<sup>B</sup></td><td>AB</td></tr>
+        <tr><td>ii</td><td>O</td></tr>
+      </table>
+    </div>
+
+    <div class="card blood">
+      <h3>Fator Rh</h3>
+      <p>O fator Rh é definido por um gene separado, com o alelo <strong>R</strong> (Rh+) dominante sobre <strong>r</strong> (Rh−).</p>
+      <table class="geno-table">
+        <tr><th>Genótipo</th><th>Fator Rh</th></tr>
+        <tr><td>RR ou Rr</td><td>Rh+</td></tr>
+        <tr><td>rr</td><td>Rh−</td></tr>
+      </table>
+    </div>
+
+    <div class="card blood">
+      <h3>Determine o tipo sanguíneo — quiz</h3>
+      <div class="quiz-progress" id="blood-progress">Questão 1 de 5</div>
+      <div class="quiz-prompt" id="blood-prompt"></div>
+      <div class="quiz-options" id="blood-options"></div>
+      <div class="feedback-box" id="blood-feedback"></div>
+      <div class="quiz-footer">
+        <div class="quiz-score">Acertos: <span id="blood-score">0</span>/5</div>
+        <button class="btn btn-outline" id="blood-next" style="display:none;">Próxima pergunta →</button>
+      </div>
+    </div>
+
+    <div class="card blood">
+      <h3>Mistério da Maternidade — três casos</h3>
+      <p style="font-size:.88rem;">Analise cada casal e marque quais tipos sanguíneos são <strong>geneticamente possíveis</strong> para o filho biológico. Depois clique em "Verificar caso".</p>
+      <div id="cases-container"></div>
+    </div>
+  </section>
+
+  <!-- ======================= ESTAÇÃO 3: HEMOCENTRO ======================= -->
+  <section class="panel" id="panel-hemocentro">
+    <div class="station-head">
+      <div>
+        <h2>🏥 Plantão no Centro de Doação</h2>
+        <div class="station-sub">Pacientes chegam precisando de transfusão. Escolha a bolsa de sangue compatível — o estoque é limitado e cada erro custa uma vida.</div>
+      </div>
+    </div>
+
+    <div class="card hemo" id="hemo-intro-card">
+      <h3>Regras de compatibilidade</h3>
+      <p style="font-size:.88rem;">Sangue tipo O é doador universal do sistema ABO; AB é receptor universal. No fator Rh, sangue Rh− pode ser doado para Rh+ ou Rh−, mas Rh+ só pode ser doado para Rh+.</p>
+      <div class="compat-legend">
+        <div><strong>O−</strong> doa para todos os tipos</div>
+        <div><strong>AB+</strong> recebe de todos os tipos</div>
+        <div><strong>A</strong> doa para A e AB (mesmo Rh)</div>
+        <div><strong>B</strong> doa para B e AB (mesmo Rh)</div>
+      </div>
+      <button class="btn btn-hemo" id="start-hemo-btn" style="margin-top:16px;">Iniciar plantão ▶</button>
+    </div>
+
+    <div id="hemo-game" style="display:none;">
+      <div class="hemo-hud">
+        <div class="hud-pill">🩸 Pontos: <span id="hemo-score">0</span></div>
+        <div class="hud-pill">❤️ Vidas: <span id="hemo-lives">3</span></div>
+        <div class="hud-pill">✅ Salvos: <span id="hemo-saved">0</span>/<span id="hemo-total">10</span></div>
+      </div>
+
+      <div class="patient-card" id="patient-card">
+        <div class="patient-avatar" id="patient-avatar">🤕</div>
+        <div class="patient-info">
+          <div class="p-name" id="patient-name">—</div>
+          <div class="p-story" id="patient-story">—</div>
+        </div>
+        <div class="patient-need">
+          <div class="need-label">precisa de</div>
+          <div class="need-type" id="patient-need-type">O+</div>
+        </div>
+      </div>
+
+      <div class="card hemo">
+        <h3>Estoque do hemocentro</h3>
+        <div class="stock-grid" id="stock-grid"></div>
+      </div>
+
+      <div class="card hemo">
+        <h3>Registro do plantão</h3>
+        <div class="hemo-log" id="hemo-log"></div>
+      </div>
+    </div>
+
+    <div id="hemo-end" style="display:none;">
+      <div class="card hemo end-screen">
+        <div id="end-icon" style="font-size:2.4rem;">🏆</div>
+        <h3 id="end-title">Plantão encerrado!</h3>
+        <div class="big-num" id="end-saved">0/10</div>
+        <p style="color:var(--ink-soft);">pacientes salvos com transfusões compatíveis</p>
+        <p id="end-message" style="font-size:.92rem;"></p>
+        <button class="btn btn-hemo" id="restart-hemo-btn">Jogar novamente 🔄</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>Conteúdo educativo de genética — polialelia em coelhos, sistema ABO e fator Rh. Feito para estudar brincando 🧬</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ GLOBAL SCORE & MASCOT ============ */
+  var globalScore = 0;
+  function addScore(n){
+    globalScore += n;
+    document.getElementById('global-score').textContent = globalScore;
+  }
+  function say(text){
+    document.getElementById('mascot-msg').textContent = text;
+  }
+
+  /* ============ TAB NAVIGATION ============ */
+  var tabButtons = document.querySelectorAll('nav.tabs button');
+  var panels = document.querySelectorAll('section.panel');
+  var mascotByTab = {
+    coelhos: "Vamos cruzar alguns coelhos e ver o que sai da ninhada! 🐇",
+    sangue: "Codominância é o pulo do gato aqui — I-A e I-B mandam junto. 🩸",
+    hemocentro: "Preste atenção no estoque, cada bolsa de sangue é preciosa! 🏥"
+  };
+  tabButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabButtons.forEach(function(b){ b.classList.remove('active'); });
+      panels.forEach(function(p){ p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      say(mascotByTab[btn.dataset.tab] || "Vamos lá!");
+    });
+  });
+
+  /* ================================================================
+     ESTAÇÃO 1 — COELHOS (POLIALELIA)
+     ================================================================ */
+  var ALLELES = ['C','Cch','Ch','c'];
+  var RANK = {C:0, Cch:1, Ch:2, c:3};
+  var PHENO_NAME = {0:'Selvagem (Aguti)', 1:'Chinchila', 2:'Himalaia', 3:'Albino'};
+  var PHENO_COLOR = {0:'#8B6B4A', 1:'#B9C0C4', 2:'#F5F0E6', 3:'#FFFFFF'};
+
+  function alleleLabel(t){
+    if(t === 'Cch') return 'c<sup>ch</sup>';
+    if(t === 'Ch') return 'c<sup>h</sup>';
+    return t;
+  }
+  function genotypeLabel(pair){
+    return alleleLabel(pair[0]) + ' ' + alleleLabel(pair[1]);
+  }
+  function phenotypeRank(pair){
+    return Math.min(RANK[pair[0]], RANK[pair[1]]);
+  }
+
+  var ALL_GENOTYPES = [];
+  for(var i=0;i<ALLELES.length;i++){
+    for(var j=i;j<ALLELES.length;j++){
+      ALL_GENOTYPES.push([ALLELES[i], ALLELES[j]]);
+    }
+  }
+
+  var p1Select = document.getElementById('parent1-select');
+  var p2Select = document.getElementById('parent2-select');
+  ALL_GENOTYPES.forEach(function(g, idx){
+    var rank = phenotypeRank(g);
+    var text = genotypeLabelPlain(g) + '  —  ' + PHENO_NAME[rank];
+    var opt1 = document.createElement('option');
+    opt1.value = idx; opt1.textContent = text;
+    p1Select.appendChild(opt1);
+    var opt2 = document.createElement('option');
+    opt2.value = idx; opt2.textContent = text;
+    p2Select.appendChild(opt2);
+  });
+  p2Select.selectedIndex = 3;
+
+  function genotypeLabelPlain(pair){
+    function plain(t){
+      if(t==='Cch') return 'c ch';
+      if(t==='Ch') return 'c h';
+      return t;
+    }
+    return plain(pair[0]) + ' ' + plain(pair[1]);
+  }
+
+  function runCross(){
+    var g1 = ALL_GENOTYPES[parseInt(p1Select.value,10)];
+    var g2 = ALL_GENOTYPES[parseInt(p2Select.value,10)];
+    var table = document.getElementById('punnett-table');
+    var html = '<tr><th></th><th>' + alleleLabel(g2[0]) + '</th><th>' + alleleLabel(g2[1]) + '</th></tr>';
+    var counts = {0:0,1:0,2:0,3:0};
+    g1.forEach(function(a1){
+      html += '<tr><th>' + alleleLabel(a1) + '</th>';
+      g2.forEach(function(a2){
+        var off = [a1,a2];
+        var rank = phenotypeRank(off);
+        counts[rank]++;
+        html += '<td><div class="offspring-cell">' +
+                  '<span class="swatch" style="background:' + PHENO_COLOR[rank] + '"></span>' +
+                  '<span>' + genotypeLabel(off) + '</span>' +
+                  '<span class="pheno-name">' + PHENO_NAME[rank] + '</span>' +
+                '</div></td>';
+      });
+      html += '</tr>';
+    });
+    table.innerHTML = html;
+
+    var summary = document.getElementById('ratio-summary');
+    var sHtml = '';
+    [0,1,2,3].forEach(function(r){
+      if(counts[r] > 0){
+        sHtml += '<div class="ratio-item"><span class="swatch" style="background:' + PHENO_COLOR[r] + '"></span>' +
+                  counts[r] + '/4 ' + PHENO_NAME[r] + '</div>';
+      }
+    });
+    summary.innerHTML = sHtml;
+    say("Olha só essa ninhada! Repare qual alelo 'ganhou' em cada filhote. 🐰");
+  }
+  document.getElementById('cross-btn').addEventListener('click', runCross);
+  runCross();
+
+  /* ---- Rabbit quiz ---- */
+  var rabbitQuestions = [
+    {
+      prompt: 'Um coelho tem genótipo C c<sup>h</sup>. Qual é o fenótipo dele?',
+      options: ['Selvagem (Aguti)', 'Chinchila', 'Himalaia', 'Albino'],
+      correct: 0,
+      explain: 'O alelo C é o mais dominante da série. Mesmo escondendo c-h, o fenótipo mostrado é Selvagem.'
+    },
+    {
+      prompt: 'Um coelho tem genótipo c<sup>ch</sup> c. Qual é o fenótipo dele?',
+      options: ['Selvagem (Aguti)', 'Chinchila', 'Himalaia', 'Albino'],
+      correct: 1,
+      explain: 'c-ch é dominante sobre c (albino), então o fenótipo é Chinchila.'
+    },
+    {
+      prompt: 'Um coelho tem genótipo c<sup>h</sup> c. Qual é o fenótipo dele?',
+      options: ['Selvagem (Aguti)', 'Chinchila', 'Himalaia', 'Albino'],
+      correct: 2,
+      explain: 'c-h é dominante sobre c, então o fenótipo é Himalaia (corpo claro, extremidades escuras).'
+    },
+    {
+      prompt: 'Um coelho tem genótipo c c. Qual é o fenótipo dele?',
+      options: ['Selvagem (Aguti)', 'Chinchila', 'Himalaia', 'Albino'],
+      correct: 3,
+      explain: 'Só existem alelos c (o mais recessivo da série), então o coelho é Albino.'
+    },
+    {
+      prompt: 'Cruzando C c<sup>h</sup> × c<sup>h</sup> c<sup>h</sup>, qual a probabilidade de um filhote ser Himalaia?',
+      options: ['0%', '25%', '50%', '100%'],
+      correct: 2,
+      explain: 'Combinações possíveis: C×ch = Selvagem, C×ch = Selvagem, ch×ch = Himalaia, ch×ch = Himalaia. Isso dá 2 em 4, ou 50%.'
+    }
+  ];
+  buildQuiz({
+    prefix: 'rabbit',
+    questions: rabbitQuestions,
+    correctSay: "Isso aí! Você entendeu a hierarquia de dominância. 🐇",
+    wrongSay: "Quase! Lembre-se: vale o alelo mais dominante presente."
+  });
+
+  /* ================================================================
+     ESTAÇÃO 2 — SANGUE (ABO + RH)
+     ================================================================ */
+  var bloodQuestions = [
+    {
+      prompt: 'Genótipo I<sup>A</sup>I<sup>A</sup> para ABO e Rr para o fator Rh. Qual o tipo sanguíneo?',
+      options: ['A+', 'A−', 'AB+', 'O+'],
+      correct: 0,
+      explain: 'I-A I-A dá tipo A. Rr tem o alelo dominante R, então é Rh+. Resultado: A+.'
+    },
+    {
+      prompt: 'Genótipo I<sup>B</sup>i para ABO e rr para o fator Rh. Qual o tipo sanguíneo?',
+      options: ['B+', 'B−', 'O−', 'AB−'],
+      correct: 1,
+      explain: 'I-B i dá tipo B (I-B é dominante sobre i). rr não tem alelo R, então é Rh−. Resultado: B−.'
+    },
+    {
+      prompt: 'Genótipo I<sup>A</sup>I<sup>B</sup> para ABO e RR para o fator Rh. Qual o tipo sanguíneo?',
+      options: ['A+', 'B+', 'AB+', 'AB−'],
+      correct: 2,
+      explain: 'I-A e I-B são codominantes, aparecem juntos: tipo AB. RR é Rh+. Resultado: AB+.'
+    },
+    {
+      prompt: 'Genótipo ii para ABO e rr para o fator Rh. Qual o tipo sanguíneo?',
+      options: ['O+', 'O−', 'AB−', 'A−'],
+      correct: 1,
+      explain: 'ii não tem I-A nem I-B, então é tipo O. rr é Rh−. Resultado: O− — o doador universal!'
+    },
+    {
+      prompt: 'Genótipo I<sup>A</sup>i para ABO e RR para o fator Rh. Qual o tipo sanguíneo?',
+      options: ['A+', 'A−', 'O+', 'AB+'],
+      correct: 0,
+      explain: 'I-A i dá tipo A (I-A domina sobre i). RR é Rh+. Resultado: A+.'
+    }
+  ];
+  buildQuiz({
+    prefix: 'blood',
+    questions: bloodQuestions,
+    correctSay: "Exato! Você já pensa como um hematologista. 🩸",
+    wrongSay: "Revise: I-A e I-B são codominantes, i é sempre recessivo."
+  });
+
+  /* ---- Generic quiz engine ---- */
+  function buildQuiz(cfg){
+    var idx = 0;
+    var score = 0;
+    var promptEl = document.getElementById(cfg.prefix + '-prompt');
+    var optsEl = document.getElementById(cfg.prefix + '-options');
+    var fbEl = document.getElementById(cfg.prefix + '-feedback');
+    var progEl = document.getElementById(cfg.prefix + '-progress');
+    var scoreEl = document.getElementById(cfg.prefix + '-score');
+    var nextBtn = document.getElementById(cfg.prefix + '-next');
+
+    function render(){
+      var q = cfg.questions[idx];
+      progEl.textContent = 'Questão ' + (idx+1) + ' de ' + cfg.questions.length;
+      promptEl.innerHTML = q.prompt;
+      fbEl.className = 'feedback-box';
+      fbEl.textContent = '';
+      nextBtn.style.display = 'none';
+      optsEl.innerHTML = '';
+      q.options.forEach(function(optText, oIdx){
+        var b = document.createElement('button');
+        b.className = 'opt-btn';
+        b.innerHTML = optText;
+        b.addEventListener('click', function(){ answer(oIdx, b); });
+        optsEl.appendChild(b);
+      });
+    }
+
+    function answer(oIdx, btnEl){
+      var q = cfg.questions[idx];
+      var allBtns = optsEl.querySelectorAll('.opt-btn');
+      allBtns.forEach(function(b){ b.disabled = true; });
+      if(oIdx === q.correct){
+        btnEl.classList.add('correct');
+        score++;
+        scoreEl.textContent = score;
+        addScore(10);
+        fbEl.className = 'feedback-box show ok';
+        fbEl.innerHTML = '<strong>Certo!</strong> ' + q.explain;
+        say(cfg.correctSay);
+      } else {
+        btnEl.classList.add('incorrect');
+        btnEl.classList.add('shake');
+        allBtns[q.correct].classList.add('reveal');
+        fbEl.className = 'feedback-box show no';
+        fbEl.innerHTML = '<strong>Não foi dessa vez.</strong> ' + q.explain;
+        say(cfg.wrongSay);
+      }
+      if(idx < cfg.questions.length - 1){
+        nextBtn.style.display = 'inline-block';
+      } else {
+        fbEl.innerHTML += '<br><br><strong>Quiz concluído — ' + score + '/' + cfg.questions.length + ' acertos.</strong>';
+      }
+    }
+
+    nextBtn.addEventListener('click', function(){
+      idx++;
+      render();
+    });
+
+    render();
+  }
+
+  /* ---- Pedigree / maternity cases ---- */
+  var cases = [
+    {
+      id: 'caso1',
+      title: 'Caso 1 — Troca no berçário?',
+      desc: 'Mãe: tipo O (genótipo ii). Pai: tipo AB (genótipo I<sup>A</sup>I<sup>B</sup>). Marque todos os tipos sanguíneos que SÃO POSSÍVEIS para o filho biológico deste casal.',
+      options: ['A','B','AB','O'],
+      correctSet: ['A','B'],
+      explain: 'A mãe só pode passar o alelo i. O pai passa I-A ou I-B. Logo o filho só pode ser I-A i (tipo A) ou I-B i (tipo B). AB e O são impossíveis para este casal.'
+    },
+    {
+      id: 'caso2',
+      title: 'Caso 2 — O casal misterioso',
+      desc: 'Mãe: tipo A (genótipo desconhecido, pode ser I<sup>A</sup>I<sup>A</sup> ou I<sup>A</sup>i). Pai: tipo B (genótipo desconhecido, pode ser I<sup>B</sup>I<sup>B</sup> ou I<sup>B</sup>i). Marque todos os tipos POSSÍVEIS para o filho.',
+      options: ['A','B','AB','O'],
+      correctSet: ['A','B','AB','O'],
+      explain: 'Como não sabemos os genótipos exatos, e ambos podem ser heterozigotos, todas as combinações são possíveis: I-A×I-B = AB, I-A×i = A, i×I-B = B, i×i = O. Um casal A × B pode ter filhos dos quatro tipos!'
+    },
+    {
+      id: 'caso3',
+      title: 'Caso 3 — Alerta no hemocentro',
+      desc: 'Mãe: tipo O (genótipo ii). Pai: tipo O (genótipo ii). O hospital registrou o bebê como tipo A. Isso é geneticamente possível?',
+      options: ['Sim, é possível', 'Não, é impossível'],
+      correctSet: ['Não, é impossível'],
+      explain: 'Dois pais tipo O só têm alelos i para passar. O único genótipo possível para o filho é ii (tipo O). Um bebê tipo A indica erro de registro — vale checar com o hospital!'
+    }
+  ];
+
+  var casesContainer = document.getElementById('cases-container');
+  cases.forEach(function(c){
+    var wrap = document.createElement('div');
+    wrap.style.marginBottom = '22px';
+    wrap.style.paddingBottom = '18px';
+    wrap.style.borderBottom = '1px solid var(--line)';
+
+    var selected = new Set();
+    var checked = false;
+
+    var html = '<h4 style="font-size:1rem; margin-bottom:6px;">' + c.title + '</h4>' +
+                '<div class="case-desc">' + c.desc + '</div>' +
+                '<div class="chip-row" id="chips-' + c.id + '"></div>' +
+                '<button class="btn btn-blood" id="verify-' + c.id + '">Verificar caso</button>' +
+                '<div class="feedback-box" id="fb-' + c.id + '"></div>';
+    wrap.innerHTML = html;
+    casesContainer.appendChild(wrap);
+
+    var chipsEl = wrap.querySelector('#chips-' + c.id);
+    c.options.forEach(function(opt){
+      var chip = document.createElement('button');
+      chip.className = 'chip-btn';
+      chip.textContent = opt;
+      chip.addEventListener('click', function(){
+        if(checked) return;
+        if(selected.has(opt)){ selected.delete(opt); chip.classList.remove('selected'); }
+        else { selected.add(opt); chip.classList.add('selected'); }
+      });
+      chipsEl.appendChild(chip);
+    });
+
+    var verifyBtn = wrap.querySelector('#verify-' + c.id);
+    var fbEl = wrap.querySelector('#fb-' + c.id);
+    verifyBtn.addEventListener('click', function(){
+      if(checked) return;
+      checked = true;
+      var correctSet = new Set(c.correctSet);
+      var allChips = chipsEl.querySelectorAll('.chip-btn');
+      var allCorrect = true;
+      allChips.forEach(function(chip){
+        chip.disabled = true;
+        var opt = chip.textContent;
+        var wasSelected = selected.has(opt);
+        var shouldBe = correctSet.has(opt);
+        if(shouldBe && wasSelected){ chip.classList.add('marked-correct'); }
+        else if(shouldBe && !wasSelected){ chip.classList.add('marked-missing'); allCorrect = false; }
+        else if(!shouldBe && wasSelected){ chip.classList.add('marked-wrong'); allCorrect = false; }
+      });
+      verifyBtn.style.display = 'none';
+      fbEl.className = allCorrect ? 'feedback-box show ok' : 'feedback-box show no';
+      fbEl.innerHTML = (allCorrect ? '<strong>Perfeito, caso resolvido!</strong> ' : '<strong>Quase lá.</strong> ') + c.explain;
+      if(allCorrect){ addScore(15); say("Você resolveu o caso como um verdadeiro geneticista forense! 🔍"); }
+      else { say("Reveja a explicação — esses casos de parentesco confundem todo mundo no começo."); }
+    });
+  });
+
+  /* ================================================================
+     ESTAÇÃO 3 — HEMOCENTRO
+     ================================================================ */
+  var BLOOD_TYPES = ['O-','O+','A-','A+','B-','B+','AB-','AB+'];
+
+  function canDonate(donor, recipient){
+    var dABO = donor.replace(/[+-]/,'');
+    var rABO = recipient.replace(/[+-]/,'');
+    var dRh = donor.slice(-1);
+    var rRh = recipient.slice(-1);
+    var aboOk = false;
+    if(dABO === 'O') aboOk = true;
+    else if(dABO === 'A') aboOk = (rABO === 'A' || rABO === 'AB');
+    else if(dABO === 'B') aboOk = (rABO === 'B' || rABO === 'AB');
+    else if(dABO === 'AB') aboOk = (rABO === 'AB');
+    var rhOk = (dRh === '-') || (dRh === '+' && rRh === '+');
+    return aboOk && rhOk;
+  }
+
+  var PATIENT_NAMES = ['Marina', 'Thiago', 'Elisa', 'Rodrigo', 'Camila', 'Bruno', 'Larissa', 'Felipe', 'Aline', 'Gustavo', 'Juliana', 'Renato'];
+  var PATIENT_STORIES = [
+    'Cirurgia de emergência após acidente de carro.',
+    'Parto com complicações, precisa de transfusão urgente.',
+    'Tratamento de anemia grave.',
+    'Cirurgia cardíaca programada.',
+    'Vítima de queda, hemorragia interna.',
+    'Transplante em andamento, sangue necessário.',
+    'Complicação pós-cirúrgica no centro cirúrgico.',
+    'Criança com anemia falciforme em crise.'
+  ];
+
+  var hemoState = null;
+
+  function weightedRandomType(){
+    // pesos aproximados de prevalência populacional
+    var weights = {'O+':37,'A+':34,'B+':9,'AB+':3,'O-':7,'A-':6,'B-':2,'AB-':1};
+    var total = 0;
+    for(var k in weights) total += weights[k];
+    var r = Math.random() * total;
+    for(var k2 in weights){
+      if(r < weights[k2]) return k2;
+      r -= weights[k2];
+    }
+    return 'O+';
+  }
+
+  function startHemo(){
+    var stock = {};
+    BLOOD_TYPES.forEach(function(t){ stock[t] = 2 + Math.floor(Math.random()*3); });
+    var patients = [];
+    for(var i=0;i<10;i++){
+      patients.push({
+        name: PATIENT_NAMES[Math.floor(Math.random()*PATIENT_NAMES.length)],
+        story: PATIENT_STORIES[Math.floor(Math.random()*PATIENT_STORIES.length)],
+        need: weightedRandomType()
+      });
+    }
+    hemoState = { stock: stock, patients: patients, index: 0, score: 0, lives: 3, saved: 0 };
+    document.getElementById('hemo-intro-card').style.display = 'none';
+    document.getElementById('hemo-end').style.display = 'none';
+    document.getElementById('hemo-game').style.display = 'block';
+    document.getElementById('hemo-total').textContent = patients.length;
+    document.getElementById('hemo-log').innerHTML = '';
+    updateHemoHUD();
+    renderStock();
+    renderPatient();
+  }
+
+  function updateHemoHUD(){
+    document.getElementById('hemo-score').textContent = hemoState.score;
+    document.getElementById('hemo-lives').textContent = hemoState.lives;
+    document.getElementById('hemo-saved').textContent = hemoState.saved;
+  }
+
+  function renderStock(){
+    var grid = document.getElementById('stock-grid');
+    grid.innerHTML = '';
+    BLOOD_TYPES.forEach(function(t){
+      var count = hemoState.stock[t];
+      var btn = document.createElement('button');
+      btn.className = 'bag-btn';
+      btn.disabled = count <= 0;
+      btn.innerHTML = '<div class="blood-bag" id="bag-' + t.replace('+','plus').replace('-','minus') + '"><span class="bag-label">' + t + '</span></div>' +
+                       '<span class="bag-count">' + count + ' un.</span>';
+      btn.addEventListener('click', function(){ giveBag(t); });
+      grid.appendChild(btn);
+    });
+  }
+
+  function renderPatient(){
+    var p = hemoState.patients[hemoState.index];
+    document.getElementById('patient-name').textContent = p.name;
+    document.getElementById('patient-story').textContent = p.story;
+    document.getElementById('patient-need-type').textContent = p.need;
+  }
+
+  function logEntry(text, ok){
+    var log = document.getElementById('hemo-log');
+    var div = document.createElement('div');
+    div.className = ok ? 'log-ok' : 'log-bad';
+    div.textContent = (ok ? '✅ ' : '❌ ') + text;
+    log.insertBefore(div, log.firstChild);
+  }
+
+  function giveBag(type){
+    if(!hemoState) return;
+    var p = hemoState.patients[hemoState.index];
+    hemoState.stock[type]--;
+    var compatible = canDonate(type, p.need);
+    if(compatible){
+      hemoState.score += 10;
+      hemoState.saved++;
+      logEntry(p.name + ' (precisava de ' + p.need + ') recebeu bolsa ' + type + ' — compatível!', true);
+      say("Boa! Transfusão compatível, paciente salvo. 🩸");
+    } else {
+      hemoState.lives--;
+      logEntry(p.name + ' (precisava de ' + p.need + ') recebeu bolsa ' + type + ' — incompatível!', false);
+      say("Cuidado! " + type + " não é compatível com " + p.need + ". Reveja a tabela de compatibilidade.");
+    }
+    updateHemoHUD();
+    renderStock();
+
+    if(hemoState.lives <= 0){
+      endHemo(false);
+      return;
+    }
+    hemoState.index++;
+    if(hemoState.index >= hemoState.patients.length){
+      endHemo(true);
+      return;
+    }
+    var stockLeft = Object.values(hemoState.stock).reduce(function(a,b){return a+b;}, 0);
+    if(stockLeft <= 0){
+      endHemo(false, true);
+      return;
+    }
+    renderPatient();
+  }
+
+  function endHemo(completedAll, outOfStock){
+    addScore(hemoState.score);
+    document.getElementById('hemo-game').style.display = 'none';
+    var endEl = document.getElementById('hemo-end');
+    endEl.style.display = 'block';
+    document.getElementById('end-saved').textContent = hemoState.saved + '/' + hemoState.patients.length;
+    var iconEl = document.getElementById('end-icon');
+    var titleEl = document.getElementById('end-title');
+    var msgEl = document.getElementById('end-message');
+    if(hemoState.lives <= 0){
+      iconEl.textContent = '💔';
+      titleEl.textContent = 'O plantão foi encerrado';
+      msgEl.textContent = 'Você ficou sem vidas após transfusões incompatíveis. Revise a tabela de compatibilidade e tente de novo!';
+    } else if(outOfStock){
+      iconEl.textContent = '📦';
+      titleEl.textContent = 'Estoque esgotado';
+      msgEl.textContent = 'O hemocentro ficou sem bolsas de sangue. Cada gota conta — capriche na escolha!';
+    } else {
+      iconEl.textContent = '🏆';
+      titleEl.textContent = 'Plantão concluído!';
+      msgEl.textContent = hemoState.saved === hemoState.patients.length
+        ? 'Perfeito! Todos os pacientes foram salvos com transfusões compatíveis.'
+        : 'Bom trabalho! Confira o registro do plantão para rever os casos.';
+    }
+    say("Fim de plantão! " + hemoState.saved + " pacientes salvos hoje.");
+  }
+
+  document.getElementById('start-hemo-btn').addEventListener('click', startHemo);
+  document.getElementById('restart-hemo-btn').addEventListener('click', startHemo);
+
+})();
+</script>
+</body>
+</html>
